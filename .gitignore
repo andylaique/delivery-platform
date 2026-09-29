@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+venv/
+.venv/
+env/
+
+# Env files (keep examples)
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.local.example
+
+# Build / runtime
+.next/
+out/
+dist/
+build/
+uploads/*
+!uploads/.gitkeep
+*.egg-info/
+.eggs/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs / coverage
+*.log
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+
+# Misc
+*.pem
