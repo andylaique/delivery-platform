@@ -1,38 +1,41 @@
-import { createContext, useContext, useState, useEffect } from 'react';
-import { translations } from '@/lib/i18n';
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { t as translate, LOCALES } from "@/lib/i18n";
 
-const LanguageContext = createContext();
+const LanguageContext = createContext(null);
+
+const STORAGE_KEY = "dp_locale";
 
 export function LanguageProvider({ children }) {
-  const [lang, setLang] = useState('en');
+  const [locale, setLocaleState] = useState("en");
 
   useEffect(() => {
-    const saved = typeof window !== 'undefined' ? localStorage.getItem('lang') : null;
-    if (saved) setLang(saved);
+    if (typeof window === "undefined") return;
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved && LOCALES.some((l) => l.code === saved)) {
+      setLocaleState(saved);
+    }
   }, []);
 
-  const t = (key) => {
-    const keys = key.split('.');
-    let val = translations[lang] || translations.en;
-    for (const k of keys) {
-      val = val?.[k];
-      if (val === undefined) return key;
+  const setLocale = useCallback((code) => {
+    if (!LOCALES.some((l) => l.code === code)) return;
+    setLocaleState(code);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(STORAGE_KEY, code);
+      document.documentElement.lang = code === "rw" ? "rw" : code;
     }
-    return val;
-  };
+  }, []);
 
-  const changeLang = (l) => {
-    setLang(l);
-    if (typeof window !== 'undefined') localStorage.setItem('lang', l);
-  };
+  const t = useCallback((key) => translate(locale, key), [locale]);
 
   return (
-    <LanguageContext.Provider value={{ lang, t, changeLang }}>
+    <LanguageContext.Provider value={{ locale, setLocale, t, locales: LOCALES }}>
       {children}
     </LanguageContext.Provider>
   );
 }
 
 export function useLanguage() {
-  return useContext(LanguageContext);
+  const ctx = useContext(LanguageContext);
+  if (!ctx) throw new Error("useLanguage must be used inside LanguageProvider");
+  return ctx;
 }
